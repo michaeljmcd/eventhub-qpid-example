@@ -10,7 +10,7 @@ import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.TextMessage;
+import javax.jms.BytesMessage;
 import javax.jms.MessageListener;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.Map;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.Charset;
 
 @Slf4j
 @SpringBootApplication
@@ -75,10 +76,14 @@ public class DemoApplication implements CommandLineRunner {
         messageConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(final Message message) {
-                log.info("Triggered message listener.");
+                log.info("Triggered message listener. {}", message);
 
                 try {
-                    log.info("Received message: {}", ((TextMessage)message).getText());
+                    final BytesMessage bMessage = (BytesMessage)message;
+                    final byte[] data = new byte[(int)bMessage.getBodyLength()];
+                    bMessage.readBytes(data);
+
+                    log.info("Received message: {}", new String(data, Charset.forName("UTF-8")));
                 } catch (JMSException e) {
                     log.error("Error attempting to examine message.", e);
                 }
