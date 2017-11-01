@@ -24,6 +24,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @SpringBootApplication
 public class DemoApplication implements CommandLineRunner {
+    @Value("${azure.eventHub.policyName}")
+    private String policyName;
+
+    @Value("${azure.eventHub.policyKey}")
+    private String policyKey;
+
+    @Value("${azure.eventHub.domainName}")
+    private String domainName;
+
+    @Value("${azure.eventHub.queue.0}")
+    private String queue0;
+
+    @Value("${azure.eventHub.queue.1}")
+    private String queue1;
+
+
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
@@ -39,33 +55,28 @@ public class DemoApplication implements CommandLineRunner {
 
         final Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         attachExceptionListenerToSession(connection);
-        attachListenerToSession(session);
+        attachListenersToSession(session);
     }
-
-    @Value("${azure.eventHub.policyName}")
-    private String policyName;
-
-    @Value("${azure.eventHub.policyKey}")
-    private String policyKey;
-
-    @Value("${azure.eventHub.domainName}")
-    private String domainName;
-
-    @Value("${azure.eventHub.queue}")
-    private String queue;
 
     private String makeEventHubUri() {
         final String template = "amqps://%s.servicebus.windows.net/?jms.username=%s&jms.password=%s&amqp.idleTimeout=1200000";
         return String.format(template, domainName, policyName, policyKey);
     }
 
-    private void attachListenerToSession(final Session session) throws JMSException {
+    private void attachListenersToSession(final Session session) throws JMSException {
+        attachListenerToSession(queue0, session);
+        attachListenerToSession(queue1, session);
+    }
+
+    private void attachListenerToSession(final String queue, final Session session) throws JMSException {
         final Destination destination = new JmsQueue(queue);
         final MessageConsumer messageConsumer = session.createConsumer(destination);
 
         messageConsumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(final Message message) {
+                log.info("Triggered message listener.");
+
                 try {
                     log.info("Received message: {}", ((TextMessage)message).getText());
                 } catch (JMSException e) {
