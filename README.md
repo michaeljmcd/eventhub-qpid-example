@@ -9,6 +9,10 @@ using Apache Qpid's (<https://qpid.apache.org/>) JMS connector.
 The command line application itself is written in Java and Spring Boot, though
 this is unlikely to be important.
 
+The example reads from Azure Event Hub, but does not write. Moreover, the
+example does no checkpointing, so restarting the application causes all non-expired 
+messages to be re-read and re-logged. This is likely to be a problem at scale.
+
 The connection settings are specified under `application.properties`, so be
 sure set these before running the example.
 
