@@ -9,7 +9,7 @@
 	<packaging>jar</packaging>
 
 	<name>eventhub-qpid-example</name>
-	<description>A simple Spring Boot example that uses qpid to connect to Azure Event Hub.</description>
+	<description>A simple Spring Boot example that uses Apache Qpid to connect to Azure Event Hub.</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
